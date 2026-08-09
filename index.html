@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="or">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ପୁରୁଣା ଗୀତ | Purana Gita — Old Odia Songs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Oriya:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#181110;
+    --panel:#241a17;
+    --panel-2:#2e211d;
+    --maroon:#6e2430;
+    --brass:#c9974c;
+    --brass-bright:#e6c07e;
+    --teal:#3f7d72;
+    --cream:#f2e8d5;
+    --cream-dim:#cfc3ab;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, #3a2620 0%, transparent 55%),
+      linear-gradient(180deg, var(--ink), #100b0a 70%);
+    color:var(--cream);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 16px;
+    overflow-x:hidden;
+  }
+
+  /* faint wood-grain / static texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:repeating-linear-gradient(115deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .set{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:420px;
+  }
+
+  .eyebrow{
+    text-align:center;
+    font-family:'Noto Sans Oriya', sans-serif;
+    font-size:15px;
+    letter-spacing:0.04em;
+    color:var(--brass-bright);
+    margin-bottom:2px;
+  }
+  h1{
+    text-align:center;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:34px;
+    margin:0 0 4px;
+    color:var(--cream);
+    letter-spacing:0.01em;
+  }
+  .sub{
+    text-align:center;
+    font-size:12px;
+    color:var(--cream-dim);
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    margin-bottom:26px;
+  }
+
+  /* ===== Console cabinet ===== */
+  .cabinet{
+    background:linear-gradient(160deg, var(--panel), var(--panel-2));
+    border-radius:22px;
+    padding:26px 22px 22px;
+    box-shadow:
+      0 30px 60px -20px rgba(0,0,0,0.65),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 0 0 1px rgba(201,151,76,0.12);
+    position:relative;
+  }
+  .cabinet::before{ /* brass corner pins */
+    content:"";
+    position:absolute; inset:10px;
+    border:1px solid rgba(201,151,76,0.18);
+    border-radius:16px;
+    pointer-events:none;
+  }
+
+  /* ===== Turntable ===== */
+  .deck{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px 0 20px;
+  }
+  .platter-wrap{
+    position:relative;
+    width:200px;
+    height:200px;
+  }
+  .platter{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at center,
+        #100b0a 0px, #100b0a 2px,
+        #1b1412 3px, #1b1412 5px);
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.55),
+      inset 0 0 0 2px rgba(201,151,76,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation:spin 7s linear infinite;
+    animation-play-state:paused;
+  }
+  .platter.spinning{ animation-play-state:running; }
+  .label{
+    width:74px;
+    height:74px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-bright), var(--maroon) 70%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+  .label::after{
+    content:"";
+    width:8px;height:8px;border-radius:50%;
+    background:var(--ink);
+  }
+  .tonearm{
+    position:absolute;
+    top:-6px;
+    right:-2px;
+    width:86px;
+    height:86px;
+    transform-origin:88% 12%;
+    transform:rotate(-28deg);
+    transition:transform 0.6s cubic-bezier(.4,1.4,.5,1);
+    pointer-events:none;
+  }
+  .tonearm.down{ transform:rotate(6deg); }
+  .tonearm svg{ width:100%; height:100%; overflow:visible; }
+
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ===== LCD-style readout ===== */
+  .readout{
+    background:#0d0908;
+    border-radius:10px;
+    padding:12px 14px;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(201,151,76,0.15);
+    margin-bottom:18px;
+    min-height:56px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:3px;
+  }
+  .now-label{
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    font-weight:600;
+  }
+  .now-title{
+    font-size:14.5px;
+    color:var(--brass-bright);
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .now-src{
+    font-size:11px;
+    color:var(--cream-dim);
+  }
+
+  /* ===== Controls ===== */
+  .controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    margin-bottom:8px;
+  }
+  .btn{
+    border:none;
+    cursor:pointer;
+    background:linear-gradient(160deg, #3a2b25, #241a17);
+    color:var(--cream);
+    box-shadow:0 4px 10px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(201,151,76,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:active{ transform:translateY(2px) scale(0.97); }
+  .btn:focus-visible{ outline:2px solid var(--brass-bright); outline-offset:3px; }
+  .btn-side{
+    width:52px; height:52px; border-radius:50%;
+  }
+  .btn-side svg{ width:18px; height:18px; fill:var(--brass-bright); }
+  .btn-main{
+    width:68px; height:68px; border-radius:50%;
+    background:linear-gradient(160deg, var(--maroon), #4a1720);
+    box-shadow:0 6px 16px rgba(110,36,48,0.45), inset 0 0 0 1px rgba(230,192,126,0.35);
+  }
+  .btn-main svg{ width:24px; height:24px; fill:var(--cream); }
+
+  .hint{
+    text-align:center;
+    font-size:11px;
+    color:var(--cream-dim);
+    letter-spacing:0.04em;
+    margin-top:14px;
+  }
+  .hint b{ color:var(--brass-bright); font-weight:600; }
+
+  /* start overlay */
+  .start-veil{
+    position:absolute; inset:0;
+    background:rgba(13,9,8,0.92);
+    border-radius:22px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    text-align:center;
+    padding:20px;
+    z-index:5;
+  }
+  .start-veil p{
+    max-width:260px;
+    font-size:12.5px;
+    color:var(--cream-dim);
+    line-height:1.5;
+    margin:0;
+  }
+  .start-btn{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.03em;
+    color:var(--ink);
+    background:linear-gradient(160deg, var(--brass-bright), var(--brass));
+    border:none;
+    border-radius:30px;
+    padding:13px 26px;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(201,151,76,0.25);
+  }
+  .start-oriya{
+    font-family:'Noto Sans Oriya', sans-serif;
+    font-size:20px;
+    color:var(--brass-bright);
+  }
+
+  .player-hidden{ position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+
+  .footnote{
+    text-align:center;
+    margin-top:18px;
+    font-size:10.5px;
+    color:#6f6459;
+    letter-spacing:0.03em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .platter{ animation:none !important; }
+    .tonearm{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="set">
+  <div class="eyebrow">ଓଡ଼ିଆ ପୁରୁଣା ଗୀତ</div>
+  <h1>Purana Gita</h1>
+  <div class="sub">Old Odia Songs · Shuffled &amp; Automatic</div>
+
+  <div class="cabinet" id="cabinet">
+    <div class="start-veil" id="startVeil">
+      <div class="start-oriya">ବଜାନ୍ତୁ</div>
+      <button class="start-btn" id="startBtn">▸ Start the Gramophone</button>
+      <p>Plays classic Odia songs straight from YouTube, shuffled and one after another. Nothing is downloaded or stored — just press next or previous.</p>
+    </div>
+
+    <div class="deck">
+      <div class="platter-wrap">
+        <div class="tonearm" id="tonearm">
+          <svg viewBox="0 0 86 86">
+            <circle cx="70" cy="14" r="7" fill="#c9974c" opacity="0.9"/>
+            <line x1="70" y1="14" x2="18" y2="70" stroke="#c9974c" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="18" cy="70" r="3.4" fill="#e6c07e"/>
+          </svg>
+        </div>
+        <div class="platter" id="platter">
+          <div class="label"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="readout">
+      <div class="now-label" id="stateLabel">Ready</div>
+      <div class="now-title" id="titleLabel">Press start to play a song</div>
+      <div class="now-src" id="srcLabel">&nbsp;</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-side" id="prevBtn" aria-label="Previous song">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6L10 12l10 6z"/></svg>
+      </button>
+      <button class="btn btn-main" id="playBtn" aria-label="Play or pause">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="btn btn-side" id="nextBtn" aria-label="Next song">
+        <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6l10 6-10 6z"/></svg>
+      </button>
+    </div>
+
+    <div class="hint"><b>Next</b> and <b>Previous</b> are the only controls — songs shuffle and continue on their own.</div>
+  </div>
+
+  <div class="footnote">Streamed live from YouTube · nothing stored on this site</div>
+</div>
+
+<div class="player-hidden"><div id="ytplayer"></div></div>
+
+<script>
+(function(){
+  // Curated real YouTube playlists of old / evergreen Odia songs.
+  var PLAYLISTS = [
+    "PLIuOuTJixvBGa1BReAz5yFMd3j5vowKsf", // Golden Melodies of Akshaya Mohanty (Saregama Odia)
+    "PLPyV2fg3HfCzdxB862AkX4dAe929QRXdQ", // Evergreen Old Odia Film Songs
+    "PLwHY6nCaheFFvt3o0sVvKK0-ZTsLV77NG", // Old Odia Adhunika Songs
+    "PL7Wosowl0skFp7OdjKCR6fMmJsI63jbCS", // Odia Old Album Songs
+    "PLB61A148562072792"                 // Golden Collection - Odia Old Movie Songs
+  ];
+
+  var player, queue = [], pointer = -1, videoIds = [], currentPlaylistIdx = -1;
+  var isReady = false, wantAutoplay = true;
+
+  var els = {
+    veil: document.getElementById('startVeil'),
+    startBtn: document.getElementById('startBtn'),
+    platter: document.getElementById('platter'),
+    tonearm: document.getElementById('tonearm'),
+    stateLabel: document.getElementById('stateLabel'),
+    titleLabel: document.getElementById('titleLabel'),
+    srcLabel: document.getElementById('srcLabel'),
+    playBtn: document.getElementById('playBtn'),
+    playIcon: document.getElementById('playIcon'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn')
+  };
+
+  var ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+  var ICON_PAUSE = '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
+
+  function shuffledIndices(n){
+    var arr = [];
+    for (var i=0;i<n;i++) arr.push(i);
+    for (var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
+
+  function pickPlaylist(avoidIdx){
+    var idx;
+    if (PLAYLISTS.length === 1) idx = 0;
+    else {
+      do { idx = Math.floor(Math.random()*PLAYLISTS.length); } while (idx === avoidIdx);
+    }
+    return idx;
+  }
+
+  function setSpinning(spinning){
+    els.platter.classList.toggle('spinning', spinning);
+    els.tonearm.classList.toggle('down', spinning);
+  }
+
+  function updateReadout(){
+    var data = player && player.getVideoData ? player.getVideoData() : null;
+    els.titleLabel.textContent = (data && data.title) ? data.title : 'Loading song…';
+    els.srcLabel.textContent = 'Song ' + (pointer+1) + ' of ' + videoIds.length + ' · from YouTube';
+  }
+
+  function loadNewPlaylist(){
+    currentPlaylistIdx = pickPlaylist(currentPlaylistIdx);
+    els.stateLabel.textContent = 'Finding songs…';
+    if (!player){
+      createPlayer(PLAYLISTS[currentPlaylistIdx]);
+    } else {
+      player.loadPlaylist({ list: PLAYLISTS[currentPlaylistIdx], listType: 'playlist', index: 0 });
+    }
+  }
+
+  function onPlaylistLoaded(){
+    var list = player.getPlaylist();
+    if (!list || !list.length){ return; }
+    videoIds = list;
+    queue = shuffledIndices(videoIds.length);
+    pointer = 0;
+    player.playVideoAt(queue[pointer]);
+  }
+
+  function goNext(){
+    if (!isReady) return;
+    pointer++;
+    if (pointer >= queue.length){
+      loadNewPlaylist();
+      return;
+    }
+    player.playVideoAt(queue[pointer]);
+  }
+
+  function goPrev(){
+    if (!isReady) return;
+    if (pointer > 0){
+      pointer--;
+      player.playVideoAt(queue[pointer]);
+    } else {
+      player.seekTo(0);
+    }
+  }
+
+  function togglePlay(){
+    if (!isReady) return;
+    var state = player.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) player.pauseVideo();
+    else player.playVideo();
+  }
+
+  window.onYouTubeIframeAPIReady = function(){
+    // player created on user gesture (see startBtn)
+  };
+
+  function createPlayer(playlistId){
+    player = new YT.Player('ytplayer', {
+      height: '1', width: '1',
+      playerVars: {
+        listType: 'playlist',
+        list: playlistId,
+        autoplay: 1,
+        playsinline: 1,
+        controls: 0
+      },
+      events: {
+        onReady: function(){
+          isReady = true;
+        },
+        onStateChange: function(e){
+          if (e.data === YT.PlayerState.CUED || e.data === YT.PlayerState.UNSTARTED){
+            if (!videoIds.length) onPlaylistLoaded();
+          }
+          if (e.data === YT.PlayerState.PLAYING){
+            if (!videoIds.length) onPlaylistLoaded();
+            setSpinning(true);
+            els.stateLabel.textContent = 'Now Playing';
+            els.playIcon.innerHTML = ICON_PAUSE;
+            setTimeout(updateReadout, 250);
+          } else if (e.data === YT.PlayerState.PAUSED){
+            setSpinning(false);
+            els.stateLabel.textContent = 'Paused';
+            els.playIcon.innerHTML = ICON_PLAY;
+          } else if (e.data === YT.PlayerState.ENDED){
+            goNext();
+          } else if (e.data === YT.PlayerState.BUFFERING){
+            els.stateLabel.textContent = 'Tuning in…';
+          }
+        },
+        onError: function(){
+          goNext();
+        }
+      }
+    });
+  }
+
+  els.startBtn.addEventListener('click', function(){
+    els.veil.style.display = 'none';
+    currentPlaylistIdx = pickPlaylist(-1);
+    var tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.body.appendChild(tag);
+
+    var checkApi = setInterval(function(){
+      if (window.YT && YT.Player){
+        clearInterval(checkApi);
+        createPlayer(PLAYLISTS[currentPlaylistIdx]);
+      }
+    }, 100);
+  });
+
+  els.nextBtn.addEventListener('click', goNext);
+  els.prevBtn.addEventListener('click', goPrev);
+  els.playBtn.addEventListener('click', togglePlay);
+})();
+</script>
+</body>
+</html>
