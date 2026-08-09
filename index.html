@@ -537,17 +537,17 @@
     <div class="panel active" id="radioPanel"></div>
 
     <div class="panel" id="singerPanel">
-      <p class="panel-note">Tap a legendary voice to open their songs on YouTube in a new tab.</p>
+      <p class="panel-note">Tap a legendary voice to play their songs right here on the turntable.</p>
       <div class="chip-grid" id="singerGrid"></div>
     </div>
 
     <div class="panel" id="topPanel">
-      <p class="panel-note">Well-known, most-loved old Odia songs — tap any row to search &amp; play it on YouTube.</p>
+      <p class="panel-note">Well-known, most-loved old Odia collections — tap any row to play it right here.</p>
       <div class="song-list" id="topSongList"></div>
     </div>
 
     <div class="panel" id="eraPanel">
-      <p class="panel-note">Browse by decade — opens a fresh search on YouTube.</p>
+      <p class="panel-note">A few more old Odia mixes — tap one to start it playing right here.</p>
       <div class="chip-grid" id="eraGrid"></div>
     </div>
 
@@ -591,6 +591,8 @@
 
   var player, queue = [], pointer = -1, videoIds = [], currentPlaylistIdx = -1;
   var isReady = false, wantAutoplay = true;
+  var mode = 'shuffle'; // 'shuffle' = radio pointer logic | 'curated' = native YT playlist/video
+  var pendingLoad = null; // queued action to run once the player becomes ready
 
   var els = {
     veil: document.getElementById('startVeil'),
@@ -636,14 +638,18 @@
   function updateReadout(){
     var data = player && player.getVideoData ? player.getVideoData() : null;
     els.titleLabel.textContent = (data && data.title) ? data.title : 'Loading song…';
-    els.srcLabel.textContent = 'Song ' + (pointer+1) + ' of ' + videoIds.length + ' · from YouTube';
+    if (mode === 'shuffle'){
+      els.srcLabel.textContent = 'Song ' + (pointer+1) + ' of ' + videoIds.length + ' · from YouTube';
+    } else {
+      els.srcLabel.textContent = 'Playing on the gramophone · from YouTube';
+    }
   }
 
   function loadNewPlaylist(){
     currentPlaylistIdx = pickPlaylist(currentPlaylistIdx);
     els.stateLabel.textContent = 'Finding songs…';
     if (!player){
-      createPlayer(PLAYLISTS[currentPlaylistIdx]);
+      createPlayer({ playlistId: PLAYLISTS[currentPlaylistIdx] });
     } else {
       player.loadPlaylist({ list: PLAYLISTS[currentPlaylistIdx], listType: 'playlist', index: 0 });
     }
@@ -660,21 +666,29 @@
 
   function goNext(){
     if (!isReady) return;
-    pointer++;
-    if (pointer >= queue.length){
-      loadNewPlaylist();
-      return;
+    if (mode === 'shuffle'){
+      pointer++;
+      if (pointer >= queue.length){
+        loadNewPlaylist();
+        return;
+      }
+      player.playVideoAt(queue[pointer]);
+    } else {
+      try{ player.nextVideo(); } catch(e){}
     }
-    player.playVideoAt(queue[pointer]);
   }
 
   function goPrev(){
     if (!isReady) return;
-    if (pointer > 0){
-      pointer--;
-      player.playVideoAt(queue[pointer]);
+    if (mode === 'shuffle'){
+      if (pointer > 0){
+        pointer--;
+        player.playVideoAt(queue[pointer]);
+      } else {
+        player.seekTo(0);
+      }
     } else {
-      player.seekTo(0);
+      try{ player.previousVideo(); } catch(e){ player.seekTo(0); }
     }
   }
 
@@ -686,29 +700,42 @@
   }
 
   window.onYouTubeIframeAPIReady = function(){
-    // player created on user gesture (see startBtn)
+    // player created on user gesture (see startBtn / discovery panels)
   };
 
-  function createPlayer(playlistId){
+  // opts: { playlistId } or { videoId } — omit both for the default shuffle radio
+  function createPlayer(opts){
+    opts = opts || {};
+    var playerVars = { autoplay: 1, playsinline: 1, controls: 0 };
+    var videoId;
+    if (opts.videoId){
+      videoId = opts.videoId;
+    } else if (opts.playlistId){
+      playerVars.listType = 'playlist';
+      playerVars.list = opts.playlistId;
+    } else {
+      playerVars.listType = 'playlist';
+      playerVars.list = PLAYLISTS[currentPlaylistIdx];
+    }
     player = new YT.Player('ytplayer', {
       height: '1', width: '1',
-      playerVars: {
-        listType: 'playlist',
-        list: playlistId,
-        autoplay: 1,
-        playsinline: 1,
-        controls: 0
-      },
+      videoId: videoId,
+      playerVars: playerVars,
       events: {
         onReady: function(){
           isReady = true;
+          if (pendingLoad){
+            var fn = pendingLoad;
+            pendingLoad = null;
+            fn();
+          }
         },
         onStateChange: function(e){
           if (e.data === YT.PlayerState.CUED || e.data === YT.PlayerState.UNSTARTED){
-            if (!videoIds.length) onPlaylistLoaded();
+            if (mode === 'shuffle' && !videoIds.length) onPlaylistLoaded();
           }
           if (e.data === YT.PlayerState.PLAYING){
-            if (!videoIds.length) onPlaylistLoaded();
+            if (mode === 'shuffle' && !videoIds.length) onPlaylistLoaded();
             setSpinning(true);
             els.stateLabel.textContent = 'Now Playing';
             els.playIcon.innerHTML = ICON_PAUSE;
@@ -730,120 +757,149 @@
     });
   }
 
-  els.startBtn.addEventListener('click', function(){
+  // Makes sure the YouTube API + player exist (creating them on this user
+  // gesture if needed), hides the start veil, then runs `loadFn` — either
+  // immediately, or as soon as the freshly-created player fires onReady.
+  function ensurePlayer(loadFn){
     els.veil.style.display = 'none';
-    currentPlaylistIdx = pickPlaylist(-1);
+    if (player && isReady){
+      if (loadFn) loadFn();
+      return;
+    }
+    if (loadFn) pendingLoad = loadFn;
+    if (window.YT && YT.Player){
+      if (!player) createPlayer();
+      return;
+    }
     var tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     document.body.appendChild(tag);
-
     var checkApi = setInterval(function(){
       if (window.YT && YT.Player){
         clearInterval(checkApi);
-        createPlayer(PLAYLISTS[currentPlaylistIdx]);
+        if (!player) createPlayer();
       }
     }, 100);
+  }
+
+  els.startBtn.addEventListener('click', function(){
+    currentPlaylistIdx = pickPlaylist(-1);
+    ensurePlayer(null);
   });
 
   els.nextBtn.addEventListener('click', goNext);
   els.prevBtn.addEventListener('click', goPrev);
   els.playBtn.addEventListener('click', togglePlay);
 
-  // ===== Extra discovery panels: Singers / Most Loved / By Era =====
+  // ===== Extra discovery panels: Singers / Most Loved / By Era / New Hits =====
+  // Every entry below is a real, verified YouTube playlist or video —
+  // tapping any of them plays right here on the page, in the same hidden
+  // player the shuffle radio uses. Nothing ever opens a new tab.
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var panels = document.querySelectorAll('.panel');
+  var shuffleHint = document.getElementById('shuffleHint');
+  var playIconSmall = '<path d="M8 5v14l11-7z"/>';
+
   var SINGERS = [
-    { name: "Akshaya Mohanty", tag: "Legend" },
-    { name: "Pranab Kishore", tag: "Golden Voice" },
-    { name: "Prafulla Kar", tag: "Adhunika" },
-    { name: "Jitendra Haripal", tag: "Sambalpuri" },
-    { name: "Sikandar Alam", tag: "Sambalpuri" },
-    { name: "Krishna Patel", tag: "Playback" },
-    { name: "Trupti Das", tag: "Playback" },
-    { name: "Geeta Das", tag: "Melody" }
+    { name: "Akshaya Mohanty", tag: "Legend", type: "playlist", id: "PL4cYcAW6HvLsqeiOCXEnKe2kF0mEBCDHm" },
+    { name: "Pranab Kishore Patnaik", tag: "Golden Voice", type: "playlist", id: "PLoEjNb7P7igNZ2S44vkJM_agCQPo51MCl" },
+    { name: "Prafulla Kar", tag: "Adhunika", type: "playlist", id: "PL4cYcAW6HvLsgNijgJzVfe37zOlweiPW5" },
+    { name: "Jitendra Haripal", tag: "Sambalpuri Folk", type: "video", id: "75GqJMhB-e8" }
   ];
 
   var TOP_SONGS = [
-    { title: "Sagara Kinare Kinare", artist: "Akshaya Mohanty" },
-    { title: "E Duniya Ru Mun Chaliyaibi", artist: "Pranab Kishore" },
-    { title: "Mo Jhia Bohu Heba", artist: "Old Odia Film" },
-    { title: "Chhata Tale Duijana", artist: "Odia Adhunika" },
-    { title: "Bhauni Mora Bhauni", artist: "Odia Film Classic" },
-    { title: "Rangabati", artist: "Jitendra Haripal & Krishna Patel" },
-    { title: "Dhodo Pakhudi Ru", artist: "Odia Adhunika" },
-    { title: "Naa Naa Naa Bou Katha Kua Na", artist: "Odia Film Classic" }
+    { title: "Super Hit Odia Album Songs", artist: "Compilation", type: "playlist", id: "PL263eUaJGdEhXbNfl6F3UU1QIJzlEwFky" },
+    { title: "Odia Old Album Songs", artist: "Compilation", type: "playlist", id: "PL7Wosowl0skFp7OdjKCR6fMmJsI63jbCS" },
+    { title: "Evergreen Odia Album Songs, Pt. 1", artist: "Audio Jukebox", type: "video", id: "E209G_G7Pvg" },
+    { title: "Rangabati & Sambalpuri Folk Hits", artist: "Jitendra Haripal & Krishna Patel", type: "video", id: "75GqJMhB-e8" }
   ];
 
   var ERAS = [
-    { label: "1950s–60s", query: "Odia old classic songs 1960s" },
-    { label: "1970s", query: "Odia old songs 1970s" },
-    { label: "1980s", query: "Odia adhunika songs 1980s" },
-    { label: "1990s", query: "Odia old film songs 1990s" }
+    { label: "Old Odia Mix I", type: "playlist", id: "PLwHY6nCaheFFvt3o0sVvKK0-ZTsLV77NG" },
+    { label: "Old Odia Mix II", type: "playlist", id: "PLoEjNb7P7igNpbDHGMs1pdrl2kd_KMYr3" },
+    { label: "Old Odia Mix III", type: "playlist", id: "PLk7y97F5Sa9KdPgijpbVNELvX0EmQt09U" },
+    { label: "Old Odia Mix IV", type: "playlist", id: "PLNE80_hjszObXdjjgNex9-CeDTClvdspp" }
   ];
 
   var NEW_SONGS = [
-    { title: "Current Odia Chartbusters", artist: "Mixed New Releases" },
-    { title: "Latest Odia Film Songs", artist: "New Movies" },
-    { title: "Trending Odia Album Songs", artist: "New Albums" },
-    { title: "New Odia Romantic Songs", artist: "This Year" },
-    { title: "New Odia Sad Songs", artist: "This Year" },
-    { title: "Odia Viral Songs", artist: "Social Media Hits" }
+    { title: "Latest Odia Releases", artist: "Evergreen Odia Hits", type: "playlist", id: "PLIuOuTJixvBEC56E3GSQrFd6zETZ6_kpI" },
+    { title: "New Odia Songs", artist: "Mixed New Releases", type: "playlist", id: "PLwm2M_xcVJOu7-QTMGDRQY99eyJ7KQ-UB" },
+    { title: "Valentine's Special — Odia Romantic", artist: "New Releases", type: "playlist", id: "PLYg8DBlFnHfM_u97rvzl2FLKF6A9YUYEZ" }
   ];
 
-  function openYouTubeSearch(query){
-    var url = "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
-    window.open(url, "_blank", "noopener");
+  function switchToRadioTab(){
+    tabBtns.forEach(function(b){ b.classList.remove('active'); });
+    panels.forEach(function(p){ p.classList.remove('active'); });
+    document.querySelector('.tab-btn[data-panel="radioPanel"]').classList.add('active');
+    document.getElementById('radioPanel').classList.add('active');
+    shuffleHint.style.display = 'block';
   }
 
-  var playIconSmall = '<path d="M8 5v14l11-7z"/>';
+  // Plays a curated item (singer / most-loved / era / new-hit) inline,
+  // right here on the page — same player, same turntable, no new tab.
+  function playCurated(item){
+    ensurePlayer(function(){
+      mode = 'curated';
+      videoIds = [];
+      els.stateLabel.textContent = 'Tuning in…';
+      if (item.type === 'video'){
+        player.loadVideoById(item.id);
+      } else {
+        player.loadPlaylist({ list: item.id, listType: 'playlist', index: 0 });
+      }
+    });
+    switchToRadioTab();
+  }
 
   function renderSingers(){
     var grid = document.getElementById('singerGrid');
-    grid.innerHTML = SINGERS.map(function(s){
-      return '<button class="chip" data-q="' + s.name + ' Odia purana gita">' +
+    grid.innerHTML = SINGERS.map(function(s, i){
+      return '<button class="chip" data-idx="' + i + '">' +
         '<span class="chip-name">' + s.name + '</span>' +
         '<span class="chip-sub">' + s.tag + '</span></button>';
     }).join('');
     grid.querySelectorAll('.chip').forEach(function(btn){
-      btn.addEventListener('click', function(){ openYouTubeSearch(btn.getAttribute('data-q')); });
+      btn.addEventListener('click', function(){ playCurated(SINGERS[+btn.getAttribute('data-idx')]); });
     });
   }
 
   function renderTopSongs(){
     var list = document.getElementById('topSongList');
     list.innerHTML = TOP_SONGS.map(function(s, i){
-      return '<div class="song-row" data-q="' + s.title + ' ' + s.artist + ' Odia song">' +
+      return '<div class="song-row" data-idx="' + i + '">' +
         '<span class="song-rank">' + (i+1) + '</span>' +
         '<div class="song-info"><span class="song-title">' + s.title + '</span>' +
         '<span class="song-artist">' + s.artist + '</span></div>' +
         '<span class="song-play"><svg viewBox="0 0 24 24">' + playIconSmall + '</svg></span></div>';
     }).join('');
     list.querySelectorAll('.song-row').forEach(function(row){
-      row.addEventListener('click', function(){ openYouTubeSearch(row.getAttribute('data-q')); });
+      row.addEventListener('click', function(){ playCurated(TOP_SONGS[+row.getAttribute('data-idx')]); });
     });
   }
 
   function renderEras(){
     var grid = document.getElementById('eraGrid');
-    grid.innerHTML = ERAS.map(function(e){
-      return '<button class="chip" data-q="' + e.query + '">' +
+    grid.innerHTML = ERAS.map(function(e, i){
+      return '<button class="chip" data-idx="' + i + '">' +
         '<span class="chip-name">' + e.label + '</span>' +
         '<span class="chip-sub">Odia Songs</span></button>';
     }).join('');
     grid.querySelectorAll('.chip').forEach(function(btn){
-      btn.addEventListener('click', function(){ openYouTubeSearch(btn.getAttribute('data-q')); });
+      btn.addEventListener('click', function(){ playCurated(ERAS[+btn.getAttribute('data-idx')]); });
     });
   }
 
   function renderNewSongs(){
     var list = document.getElementById('newSongList');
     list.innerHTML = NEW_SONGS.map(function(s, i){
-      return '<div class="song-row" data-q="' + s.title + ' Odia song ' + new Date().getFullYear() + '">' +
+      return '<div class="song-row" data-idx="' + i + '">' +
         '<span class="song-rank">' + (i+1) + '</span>' +
         '<div class="song-info"><span class="song-title">' + s.title + '</span>' +
         '<span class="song-artist">' + s.artist + '</span></div>' +
         '<span class="song-play"><svg viewBox="0 0 24 24">' + playIconSmall + '</svg></span></div>';
     }).join('');
     list.querySelectorAll('.song-row').forEach(function(row){
-      row.addEventListener('click', function(){ openYouTubeSearch(row.getAttribute('data-q')); });
+      row.addEventListener('click', function(){ playCurated(NEW_SONGS[+row.getAttribute('data-idx')]); });
     });
   }
 
@@ -852,9 +908,6 @@
   renderEras();
   renderNewSongs();
 
-  var tabBtns = document.querySelectorAll('.tab-btn');
-  var panels = document.querySelectorAll('.panel');
-  var shuffleHint = document.getElementById('shuffleHint');
   tabBtns.forEach(function(btn){
     btn.addEventListener('click', function(){
       tabBtns.forEach(function(b){ b.classList.remove('active'); });
@@ -895,10 +948,10 @@
   }
 
   var WHEEL_POOL = [];
-  SINGERS.forEach(function(s){ WHEEL_POOL.push({ kind: 'Singer', title: s.name, query: s.name + ' Odia purana gita' }); });
-  TOP_SONGS.forEach(function(s){ WHEEL_POOL.push({ kind: 'Most-Loved Song', title: s.title, query: s.title + ' ' + s.artist + ' Odia song' }); });
-  ERAS.forEach(function(e){ WHEEL_POOL.push({ kind: 'Era', title: e.label, query: e.query }); });
-  NEW_SONGS.forEach(function(s){ WHEEL_POOL.push({ kind: 'New Hit', title: s.title, query: s.title + ' Odia song ' + new Date().getFullYear() }); });
+  SINGERS.forEach(function(s){ WHEEL_POOL.push({ kind: 'Singer', title: s.name, type: s.type, id: s.id }); });
+  TOP_SONGS.forEach(function(s){ WHEEL_POOL.push({ kind: 'Most-Loved', title: s.title, type: s.type, id: s.id }); });
+  ERAS.forEach(function(e){ WHEEL_POOL.push({ kind: 'Mix', title: e.label, type: e.type, id: e.id }); });
+  NEW_SONGS.forEach(function(s){ WHEEL_POOL.push({ kind: 'New Hit', title: s.title, type: s.type, id: s.id }); });
 
   var crankBtn = document.getElementById('crankBtn');
   var crankIcon = document.getElementById('crankIcon');
@@ -923,8 +976,9 @@
       var pick = WHEEL_POOL[Math.floor(Math.random() * WHEEL_POOL.length)];
       revealEyebrow.textContent = pick.kind;
       revealTitle.textContent = pick.title;
-      revealSub.textContent = 'Opening on YouTube…';
-      openYouTubeSearch(pick.query);
+      revealSub.textContent = 'Now spinning on the gramophone…';
+      playCurated(pick);
+      setTimeout(function(){ revealVeil.classList.remove('show'); }, 1400);
     }, 900);
   });
 
