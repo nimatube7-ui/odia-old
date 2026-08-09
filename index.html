@@ -285,6 +285,196 @@
     .platter{ animation:none !important; }
     .tonearm{ transition:none; }
   }
+
+  /* ===== Tabs / extra panels ===== */
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin:16px 0 4px;
+    padding:4px;
+    background:#0d0908;
+    border-radius:14px;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .tab-btn{
+    flex:1;
+    border:none;
+    cursor:pointer;
+    background:transparent;
+    color:var(--cream-dim);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    padding:9px 4px;
+    border-radius:10px;
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+  .tab-btn.active{
+    background:linear-gradient(160deg, var(--maroon), #4a1720);
+    color:var(--cream);
+    box-shadow:inset 0 0 0 1px rgba(230,192,126,0.3);
+  }
+  .panel{ display:none; padding-top:16px; }
+  .panel.active{ display:block; }
+  .panel-note{
+    font-size:11px;
+    color:var(--cream-dim);
+    text-align:center;
+    margin:0 0 12px;
+    line-height:1.5;
+  }
+  .chip-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:8px;
+  }
+  .chip{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    background:var(--panel-2);
+    border:none;
+    border-radius:12px;
+    padding:12px 8px;
+    cursor:pointer;
+    color:var(--cream);
+    font-family:'Space Grotesk', sans-serif;
+    box-shadow:inset 0 0 0 1px rgba(201,151,76,0.15);
+    text-align:center;
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .chip:active{ transform:translateY(1px) scale(0.98); }
+  .chip-name{ font-size:12.5px; font-weight:600; }
+  .chip-sub{ font-size:9.5px; color:var(--brass-bright); letter-spacing:0.04em; text-transform:uppercase; }
+
+  .song-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    max-height:280px;
+    overflow-y:auto;
+    padding-right:2px;
+  }
+  .song-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:var(--panel-2);
+    border-radius:10px;
+    padding:10px 12px;
+    cursor:pointer;
+    box-shadow:inset 0 0 0 1px rgba(201,151,76,0.12);
+  }
+  .song-info{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .song-title{ font-size:12.5px; font-weight:600; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .song-artist{ font-size:10.5px; color:var(--cream-dim); }
+  .song-rank{
+    flex:none;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:16px;
+    color:var(--brass-bright);
+    width:20px;
+  }
+  .song-play{
+    flex:none;
+    width:26px; height:26px;
+    border-radius:50%;
+    background:var(--maroon);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .song-play svg{ width:11px; height:11px; fill:var(--cream); }
+
+  /* ===== Surprise crank ===== */
+  .crank-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:16px;
+  }
+  .crank-btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:linear-gradient(160deg, #3a2b25, #241a17);
+    border:none;
+    border-radius:30px;
+    padding:11px 20px 11px 14px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(201,151,76,0.3);
+    color:var(--brass-bright);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    transition:transform 0.12s ease;
+  }
+  .crank-btn:active{ transform:scale(0.97); }
+  .crank-icon{
+    width:30px; height:30px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-bright), var(--maroon) 70%);
+    display:flex; align-items:center; justify-content:center;
+    flex:none;
+  }
+  .crank-icon.spin{ animation:crankspin 0.9s linear; }
+  @keyframes crankspin{ to{ transform:rotate(360deg); } }
+  .crank-icon svg{ width:14px; height:14px; fill:var(--ink); }
+
+  .reveal-veil{
+    position:fixed;
+    inset:0;
+    background:rgba(13,9,8,0.94);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease;
+    padding:24px;
+  }
+  .reveal-veil.show{ opacity:1; pointer-events:auto; }
+  .reveal-card{
+    text-align:center;
+    max-width:280px;
+  }
+  .reveal-eyebrow{
+    font-size:10.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:10px;
+  }
+  .reveal-title{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:26px;
+    color:var(--brass-bright);
+    margin-bottom:8px;
+    line-height:1.25;
+  }
+  .reveal-sub{
+    font-size:12px;
+    color:var(--cream-dim);
+    margin-bottom:20px;
+  }
+  .reveal-close{
+    background:linear-gradient(160deg, var(--brass-bright), var(--brass));
+    border:none;
+    border-radius:24px;
+    padding:10px 22px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    color:var(--ink);
+    cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -334,7 +524,53 @@
       </button>
     </div>
 
-    <div class="hint"><b>Next</b> and <b>Previous</b> are the only controls — songs shuffle and continue on their own.</div>
+    <div class="hint" id="shuffleHint"><b>Next</b> and <b>Previous</b> are the only controls — songs shuffle and continue on their own.</div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-panel="radioPanel">Shuffle Radio</button>
+      <button class="tab-btn" data-panel="singerPanel">Singers</button>
+      <button class="tab-btn" data-panel="topPanel">Most Loved</button>
+      <button class="tab-btn" data-panel="eraPanel">By Era</button>
+      <button class="tab-btn" data-panel="newPanel">New Hits</button>
+    </div>
+
+    <div class="panel active" id="radioPanel"></div>
+
+    <div class="panel" id="singerPanel">
+      <p class="panel-note">Tap a legendary voice to open their songs on YouTube in a new tab.</p>
+      <div class="chip-grid" id="singerGrid"></div>
+    </div>
+
+    <div class="panel" id="topPanel">
+      <p class="panel-note">Well-known, most-loved old Odia songs — tap any row to search &amp; play it on YouTube.</p>
+      <div class="song-list" id="topSongList"></div>
+    </div>
+
+    <div class="panel" id="eraPanel">
+      <p class="panel-note">Browse by decade — opens a fresh search on YouTube.</p>
+      <div class="chip-grid" id="eraGrid"></div>
+    </div>
+
+    <div class="panel" id="newPanel">
+      <p class="panel-note">Fresh &amp; trending modern Odia songs — for when you want something current.</p>
+      <div class="song-list" id="newSongList"></div>
+    </div>
+
+    <div class="crank-wrap">
+      <button class="crank-btn" id="crankBtn">
+        <span class="crank-icon" id="crankIcon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+        Turn the Wheel of Fortune
+      </button>
+    </div>
+  </div>
+
+  <div class="reveal-veil" id="revealVeil">
+    <div class="reveal-card">
+      <div class="reveal-eyebrow" id="revealEyebrow">The Wheel Has Spoken</div>
+      <div class="reveal-title" id="revealTitle">…</div>
+      <div class="reveal-sub" id="revealSub">Opening on YouTube…</div>
+      <button class="reveal-close" id="revealClose">Spin Again Later</button>
+    </div>
   </div>
 
   <div class="footnote">Streamed live from YouTube · nothing stored on this site</div>
@@ -512,6 +748,189 @@
   els.nextBtn.addEventListener('click', goNext);
   els.prevBtn.addEventListener('click', goPrev);
   els.playBtn.addEventListener('click', togglePlay);
+
+  // ===== Extra discovery panels: Singers / Most Loved / By Era =====
+  var SINGERS = [
+    { name: "Akshaya Mohanty", tag: "Legend" },
+    { name: "Pranab Kishore", tag: "Golden Voice" },
+    { name: "Prafulla Kar", tag: "Adhunika" },
+    { name: "Jitendra Haripal", tag: "Sambalpuri" },
+    { name: "Sikandar Alam", tag: "Sambalpuri" },
+    { name: "Krishna Patel", tag: "Playback" },
+    { name: "Trupti Das", tag: "Playback" },
+    { name: "Geeta Das", tag: "Melody" }
+  ];
+
+  var TOP_SONGS = [
+    { title: "Sagara Kinare Kinare", artist: "Akshaya Mohanty" },
+    { title: "E Duniya Ru Mun Chaliyaibi", artist: "Pranab Kishore" },
+    { title: "Mo Jhia Bohu Heba", artist: "Old Odia Film" },
+    { title: "Chhata Tale Duijana", artist: "Odia Adhunika" },
+    { title: "Bhauni Mora Bhauni", artist: "Odia Film Classic" },
+    { title: "Rangabati", artist: "Jitendra Haripal & Krishna Patel" },
+    { title: "Dhodo Pakhudi Ru", artist: "Odia Adhunika" },
+    { title: "Naa Naa Naa Bou Katha Kua Na", artist: "Odia Film Classic" }
+  ];
+
+  var ERAS = [
+    { label: "1950s–60s", query: "Odia old classic songs 1960s" },
+    { label: "1970s", query: "Odia old songs 1970s" },
+    { label: "1980s", query: "Odia adhunika songs 1980s" },
+    { label: "1990s", query: "Odia old film songs 1990s" }
+  ];
+
+  var NEW_SONGS = [
+    { title: "Current Odia Chartbusters", artist: "Mixed New Releases" },
+    { title: "Latest Odia Film Songs", artist: "New Movies" },
+    { title: "Trending Odia Album Songs", artist: "New Albums" },
+    { title: "New Odia Romantic Songs", artist: "This Year" },
+    { title: "New Odia Sad Songs", artist: "This Year" },
+    { title: "Odia Viral Songs", artist: "Social Media Hits" }
+  ];
+
+  function openYouTubeSearch(query){
+    var url = "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
+    window.open(url, "_blank", "noopener");
+  }
+
+  var playIconSmall = '<path d="M8 5v14l11-7z"/>';
+
+  function renderSingers(){
+    var grid = document.getElementById('singerGrid');
+    grid.innerHTML = SINGERS.map(function(s){
+      return '<button class="chip" data-q="' + s.name + ' Odia purana gita">' +
+        '<span class="chip-name">' + s.name + '</span>' +
+        '<span class="chip-sub">' + s.tag + '</span></button>';
+    }).join('');
+    grid.querySelectorAll('.chip').forEach(function(btn){
+      btn.addEventListener('click', function(){ openYouTubeSearch(btn.getAttribute('data-q')); });
+    });
+  }
+
+  function renderTopSongs(){
+    var list = document.getElementById('topSongList');
+    list.innerHTML = TOP_SONGS.map(function(s, i){
+      return '<div class="song-row" data-q="' + s.title + ' ' + s.artist + ' Odia song">' +
+        '<span class="song-rank">' + (i+1) + '</span>' +
+        '<div class="song-info"><span class="song-title">' + s.title + '</span>' +
+        '<span class="song-artist">' + s.artist + '</span></div>' +
+        '<span class="song-play"><svg viewBox="0 0 24 24">' + playIconSmall + '</svg></span></div>';
+    }).join('');
+    list.querySelectorAll('.song-row').forEach(function(row){
+      row.addEventListener('click', function(){ openYouTubeSearch(row.getAttribute('data-q')); });
+    });
+  }
+
+  function renderEras(){
+    var grid = document.getElementById('eraGrid');
+    grid.innerHTML = ERAS.map(function(e){
+      return '<button class="chip" data-q="' + e.query + '">' +
+        '<span class="chip-name">' + e.label + '</span>' +
+        '<span class="chip-sub">Odia Songs</span></button>';
+    }).join('');
+    grid.querySelectorAll('.chip').forEach(function(btn){
+      btn.addEventListener('click', function(){ openYouTubeSearch(btn.getAttribute('data-q')); });
+    });
+  }
+
+  function renderNewSongs(){
+    var list = document.getElementById('newSongList');
+    list.innerHTML = NEW_SONGS.map(function(s, i){
+      return '<div class="song-row" data-q="' + s.title + ' Odia song ' + new Date().getFullYear() + '">' +
+        '<span class="song-rank">' + (i+1) + '</span>' +
+        '<div class="song-info"><span class="song-title">' + s.title + '</span>' +
+        '<span class="song-artist">' + s.artist + '</span></div>' +
+        '<span class="song-play"><svg viewBox="0 0 24 24">' + playIconSmall + '</svg></span></div>';
+    }).join('');
+    list.querySelectorAll('.song-row').forEach(function(row){
+      row.addEventListener('click', function(){ openYouTubeSearch(row.getAttribute('data-q')); });
+    });
+  }
+
+  renderSingers();
+  renderTopSongs();
+  renderEras();
+  renderNewSongs();
+
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var panels = document.querySelectorAll('.panel');
+  var shuffleHint = document.getElementById('shuffleHint');
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      panels.forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.getAttribute('data-panel')).classList.add('active');
+      shuffleHint.style.display = (btn.getAttribute('data-panel') === 'radioPanel') ? 'block' : 'none';
+    });
+  });
+
+  // ===== The feature you can't imagine: a "Wheel of Fortune" crank =====
+  // Pulls together every corner of the site — singers, most-loved songs,
+  // eras and new hits — into one surprise pick, revealed with a real
+  // synthesized vinyl needle-drop crackle (no audio file, pure Web Audio).
+  var audioCtx = null;
+  function playCrackle(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var duration = 0.7;
+      var bufferSize = audioCtx.sampleRate * duration;
+      var buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var i = 0; i < bufferSize; i++){
+        // sparse random pops layered over soft static, like a needle finding the groove
+        var pop = (Math.random() < 0.012) ? (Math.random()*2-1) * 0.9 : 0;
+        var hiss = (Math.random()*2-1) * 0.06 * (1 - i/bufferSize);
+        data[i] = pop + hiss;
+      }
+      var src = audioCtx.createBufferSource();
+      src.buffer = buffer;
+      var gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.9, audioCtx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      src.connect(gain).connect(audioCtx.destination);
+      src.start();
+    } catch(e){ /* Web Audio unavailable — silently skip the sound */ }
+  }
+
+  var WHEEL_POOL = [];
+  SINGERS.forEach(function(s){ WHEEL_POOL.push({ kind: 'Singer', title: s.name, query: s.name + ' Odia purana gita' }); });
+  TOP_SONGS.forEach(function(s){ WHEEL_POOL.push({ kind: 'Most-Loved Song', title: s.title, query: s.title + ' ' + s.artist + ' Odia song' }); });
+  ERAS.forEach(function(e){ WHEEL_POOL.push({ kind: 'Era', title: e.label, query: e.query }); });
+  NEW_SONGS.forEach(function(s){ WHEEL_POOL.push({ kind: 'New Hit', title: s.title, query: s.title + ' Odia song ' + new Date().getFullYear() }); });
+
+  var crankBtn = document.getElementById('crankBtn');
+  var crankIcon = document.getElementById('crankIcon');
+  var revealVeil = document.getElementById('revealVeil');
+  var revealEyebrow = document.getElementById('revealEyebrow');
+  var revealTitle = document.getElementById('revealTitle');
+  var revealSub = document.getElementById('revealSub');
+  var revealClose = document.getElementById('revealClose');
+
+  crankBtn.addEventListener('click', function(){
+    crankIcon.classList.remove('spin');
+    void crankIcon.offsetWidth; // restart animation
+    crankIcon.classList.add('spin');
+    playCrackle();
+
+    revealEyebrow.textContent = 'Spinning…';
+    revealTitle.textContent = '♪ ♪ ♪';
+    revealSub.textContent = '';
+    revealVeil.classList.add('show');
+
+    setTimeout(function(){
+      var pick = WHEEL_POOL[Math.floor(Math.random() * WHEEL_POOL.length)];
+      revealEyebrow.textContent = pick.kind;
+      revealTitle.textContent = pick.title;
+      revealSub.textContent = 'Opening on YouTube…';
+      openYouTubeSearch(pick.query);
+    }, 900);
+  });
+
+  revealClose.addEventListener('click', function(){
+    revealVeil.classList.remove('show');
+  });
 })();
 </script>
 </body>
